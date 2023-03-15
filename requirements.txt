@@ -1,1 +1,7 @@
+numpy
+ultralytics
+onnx>=1.12.0
+supervision
 lap
+deepsparse
+
