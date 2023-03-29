@@ -24,20 +24,22 @@ def denormalize(points, camera_resolution=(1920, 1080)):
     Normalized(w) = w/Image_Width
 
     Normalized(h) = h/Image_Height
-    
-          # Normalization
-      x_centre = x_centre / img_w
-      y_centre = y_centre / img_h
-      w = w / img_w
-      h = h / img_h
     """
-    points[:, 0] = points[:, 0]*camera_resolution[0]
-    points[:, 1] = points[:, 1]*camera_resolution[1]
-    points[:, 2] = points[:, 2]*camera_resolution[0]
-    points[:, 3] = points[:, 3]*camera_resolution[1]
+    
+    #DENORMALIZE
+    points[:, 0] = points[:, 0]*camera_resolution[0] # x-center
+    points[:, 1] = points[:, 1]*camera_resolution[1] # y-center
+    points[:, 2] = points[:, 2]*camera_resolution[0] # width-bb
+    points[:, 3] = points[:, 3]*camera_resolution[1] # height-bb
     
     return points
     
+def shift(points):
+    #Shift the point of interest from center to floor
+    #of bounding box
+    points[:, 1] = points[:, 1] + points[:, 3]/2
+    
+    return points
     
 
 def localize(points):
@@ -47,7 +49,7 @@ def localize(points):
     psi   = 0
     Od_x  = 0
     Od_y  = 0
-    Od_z  = 0.23
+    Od_z  = 0.945
     
     rot_x = [[1,           0,            0],
              [0, np.cos(phi), -np.sin(phi)],
@@ -124,20 +126,25 @@ def main():
             text_padding=5
         )
 
-        ##480x640
-        #frame_width = 480
-        #frame_height = 640
-        #cap = cv2.VideoCapture(video)
-        #cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
-        #cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
 
-    for result in model.track(source="3", classes=49, show=False, stream=True):
+    frame_width, frame_height = 1920, 1080
+    
+    cap = cv2.VideoCapture(video)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
+    
+    while True:
+        
+        
+        
+    for result in model.track(source="3", classes=[49, 32], show=False, stream=True):
 
         frame = result.orig_img
         detections = sv.Detections.from_yolov8(result)
         
         
         points = denormalize(result.boxes.xywhn, camera_resolution=(1920, 1080))
+        points = shift(points)
         x_coords = points[:, 0]
         y_coords = points[:, 1]
         points = torch.transpose(points[:, 0:2], 0, 1).numpy()
