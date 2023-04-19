@@ -19,7 +19,7 @@ class Stalker():
         
         #The following two attributes come from the calibration script
         Path(os.getcwd()).parent
-        self.intrinsic_matrix = pd.read_csv(str(Path(os.getcwd()).parent) 
+        self.intrinsic_matrix = pd.read_csv(str(os.getcwd()) 
                                           + "/calibration/details/intrinsic_matrix.txt", 
                                           delim_whitespace=True, 
                                           header=None).to_numpy()
@@ -29,7 +29,7 @@ class Stalker():
         #                                     delim_whitespace=True, 
         #                                     header=None).to_numpy()
         
-        self.dist_coefficients = pd.read_csv(str(Path(os.getcwd()).parent) 
+        self.dist_coefficients = pd.read_csv(str(os.getcwd()) 
                                              + "/calibration/details/dist_coefficients.txt", 
                                              delim_whitespace=True, 
                                              header=None).to_numpy()
@@ -166,7 +166,7 @@ class Stalker():
 
 
 def main():
-    model = YOLO("yolov8n.pt")
+    model = YOLO(str(Path(os.getcwd()).parent) + "/model/yolov8n.pt")
     stalker = Stalker()
     device = 2
     
@@ -190,7 +190,7 @@ def main():
                               classes=[49, 32], 
                               conf=0.3, 
                               show=False, 
-                              tracker="customtrack.yaml", 
+                              tracker=str(Path(os.getcwd()).parent) + "/model/customtrack.yaml", 
                               stream=True):   
         
         frame = result.orig_img
@@ -240,7 +240,6 @@ def main():
     
          
 if __name__ == "__main__":    
-    #print(Path(os.getcwd()).parent)
     main()				
     
     
