@@ -1,15 +1,15 @@
-from pathlib import Path
-from glob import glob
 import os
-import pandas as pd
-from ultralytics import YOLO
 import cv2
-import matplotlib.pyplot as plt
-import imutils
-import supervision as sv
 import time
 import torch
+import imutils
 import numpy as np
+import pandas as pd
+from glob import glob
+from pathlib import Path
+import supervision as sv
+from ultralytics import YOLO
+import matplotlib.pyplot as plt
 
 
 class Stalker():
@@ -18,12 +18,23 @@ class Stalker():
         self.cam_height = camera_resolution[1]
         
         #The following two attributes come from the calibration script
-        self.cam_intrinsics = pd.read_csv("cam_intrinsics.txt", delim_whitespace=True, header=None).to_numpy()
-        self.newcam_intrinsics = pd.read_csv("newcam_intrinsics.txt", delim_whitespace=True, header=None).to_numpy()
-        self.dist_coefficients = pd.read_csv("dist_coefficients.txt", delim_whitespace=True, header=None).to_numpy()
+        Path(os.getcwd()).parent
+        self.intrinsic_matrix = pd.read_csv(str(Path(os.getcwd()).parent) 
+                                          + "/calibration/details/intrinsic_matrix.txt", 
+                                          delim_whitespace=True, 
+                                          header=None).to_numpy()
+        
+        #self.intrinsic_newmatrix = pd.read_csv(str(Path(os.getcwd()).parent) 
+        #                                     + "/calibration/details/newcam_intrinsics.txt", 
+        #                                     delim_whitespace=True, 
+        #                                     header=None).to_numpy()
+        
+        self.dist_coefficients = pd.read_csv(str(Path(os.getcwd()).parent) 
+                                             + "/calibration/details/dist_coefficients.txt", 
+                                             delim_whitespace=True, 
+                                             header=None).to_numpy()
         
     
-
     def _denormalize(self, points):
         """
         Normalization Formulas:    
@@ -61,12 +72,12 @@ class Stalker():
         x = points[:, 0]
         y = points[:, 1]    
         
-        
         #x, y = points#.astype(float)
         x = (x - cx) / fx
         x0 = x
         y = (y - cy) / fy
         y0 = y
+        
         for _ in range(iter_num):
             r2 = x ** 2 + y ** 2
             k_inv = 1 / (1 + k1 * r2 + k2 * r2**2 + k3 * r2**3)
@@ -98,7 +109,7 @@ class Stalker():
         #   row1: y
         #   columns: represents individual points 
         # After calling _undistort     
-        points = self._undistort(points, self.newcam_intrinsics, self.dist_coefficients)
+        points = self._undistort(points, self.intrinsic_matrix, self.dist_coefficients)
         print(points)
         #points = torch.transpose(points[:, 0:2], 0, 1).numpy()
   
@@ -108,7 +119,7 @@ class Stalker():
         psi   = 0
         Od_x  = 0
         Od_y  = 0
-        Od_z  = 0.23
+        Od_z  = 0.235
         
         rot_x = np.asarray([[1,           0,            0],
                             [0, np.cos(phi), -np.sin(phi)],
@@ -139,31 +150,25 @@ class Stalker():
         
         #Camera pose relative to World frame:
         t_wc = t_wd@t_dc
-        
-        
-        #Camera Intrinsics
-        #cam_intrinsics = pd.read_csv("cam_intrinsics.txt", delim_whitespace=True, header=None) 
-        #cam_intrinsics = cam_intrinsics.to_numpy()
-        
+                
         #Localize point in World Coords
         #Transform Point to a Homogeneous Point
         points = np.vstack((points, np.ones((1, len(points[0,:])))))
         
-        A_cpx = np.linalg.inv(self.newcam_intrinsics) @ points 
+        A_ckpx = np.linalg.inv(self.intrinsic_matrix) @ points 
         R_wc = t_wc[0:3, 0:3]
         O_wc = t_wc[0:3, 3][:, np.newaxis]
         Z = np.asarray([[0],[0],[1]])
 
         #Point K with respect to World Frame
-        A_wk = O_wc + (-O_wc[2,:]/(np.dot(R_wc, A_cpx)[2,:]))*np.dot(R_wc, A_cpx)
+        A_wk = O_wc + (-O_wc[2,:]/(np.dot(R_wc, A_ckpx)[2,:]))*np.dot(R_wc, A_ckpx)
         return A_wk
 
 
-
 def main():
-    model = YOLO("yolov8m.pt")
+    model = YOLO("yolov8n.pt")
     stalker = Stalker()
-    device = 4
+    device = 2
     
     #*********************FPS-DISPLAY-SETTINGS***********************
     # used to record the time when we processed last frame
@@ -181,71 +186,12 @@ def main():
             text_padding=5
         )
 
-    
-    """
-    frame_width, frame_height = 1920, 1080    
-    cap = cv2.VideoCapture(4)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-    
-    #Camera Intrinsics
-    cam_intrinsics = pd.read_csv("cam_intrinsics.txt", delim_whitespace=True, header=None).to_numpy()
-
-    #Distortion Coefficients
-    dist_coefficients = pd.read_csv("dist_coefficients.txt", delim_whitespace=True, header=None).to_numpy()
-
-        
-    while True:
-        ret, frame = cap.read()        
-        frame = cv2.undistort(frame, cam_intrinsics, dist_coefficients, None, cam_intrinsics)
-
-        result = model.track(frame, classes=[49, 32], conf=0.3, tracker="bytetrack.yaml")[0]
-        detections = sv.Detections.from_yolov8(result)
-        
-        points = result.boxes.xywhn
-        points_world = stalker.localize(points)
-        #points = denormalize(points, camera_resolution=(1920, 1080))
-        #points = shift(points)
-        #x_coords = points[:, 0]
-        #y_coords = points[:, 1]
-        #points = torch.transpose(points[:, 0:2], 0, 1).numpy()
-        #points_world = localize(points)
-        print("Pixel_Coords: {} ".format(points_world))
-
-        
-        if result.boxes.id is not None:
-            detections.tracker_id = result.boxes.id.cpu().numpy().astype(int) 
-            
-        labels = [
-            f"#:{tracker_id}, {model.model.names[class_id]}: {confidence:0.2f}"
-            for _, confidence, class_id, tracker_id 
-            in detections
-        ]
-
-        frame = box_annotator.annotate(scene=frame, detections=detections, labels=labels)
-
-        # time when we finish processing for this frame
-        new_frame_time = time.time()
-        # fps will be number of frame processed in given time frame
-        # since their will be most of time error of 0.001 second
-        # we will be subtracting it to get more accurate result
-        fps = 1/(new_frame_time-prev_frame_time)
-        prev_frame_time = new_frame_time
-        # converting the fps into integer
-        fps = int(fps)
-        # converting the fps to string so that we can display it on frame
-        # by using putText function
-        fps = str(fps)
-
-        # putting the FPS count on the frame
-        cv2.putText(frame, "FPS: {}".format(fps), (7, 30), font, 1, (100, 255, 0), 3, cv2.LINE_AA)
-        cv2.imshow("yolov8", imutils.resize(frame, width=640))
-        if (cv2.waitKey(20) == ord("q")):
-            break
-        
-        
-    """
-    for result in model.track(source="4", classes=[49, 32], conf=0.3, show=False, tracker="customtrack.yaml", stream=True):   
+    for result in model.track(source=device, 
+                              classes=[49, 32], 
+                              conf=0.3, 
+                              show=False, 
+                              tracker="customtrack.yaml", 
+                              stream=True):   
         
         frame = result.orig_img
         detections = sv.Detections.from_yolov8(result)
@@ -292,10 +238,9 @@ def main():
         if (cv2.waitKey(20) == ord("q")):
             break
     
-        
-    
-    
-if __name__ == "__main__":
+         
+if __name__ == "__main__":    
+    #print(Path(os.getcwd()).parent)
     main()				
     
     
