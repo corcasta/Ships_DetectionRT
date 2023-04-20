@@ -2,12 +2,12 @@ train: ../train/images
 val: ../valid/images
 test: ../test/images
 
-nc: 4
-names: ['boat', 'buoy', 'kayak', 'ship']
+nc: 2
+names: ['buoy', 'ship']
 
 roboflow:
-  workspace: lyx-limyixian-gmail-com
-  project: singapore-maritime
-  version: 4
-  license: Public Domain
-  url: https://universe.roboflow.com/lyx-limyixian-gmail-com/singapore-maritime/dataset/4
+  workspace: ships-detection2
+  project: backup-ships
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/ships-detection2/backup-ships/dataset/1
