@@ -23,7 +23,7 @@ class Stalker():
                                             delim_whitespace=True, 
                                             header=None).to_numpy()
         
-        #self.intrinsic_newmatrix = pd.read_csv(str(Path(os.getcwd()).parent) 
+        #self.intrinsic_newmatrix = pd.read_csv(str(os.getcwd()) 
         #                                     + "/cam_calibration/details/newcam_intrinsics.txt", 
         #                                     delim_whitespace=True, 
         #                                     header=None).to_numpy()
@@ -86,7 +86,27 @@ class Stalker():
             x = (x0 - delta_x) * k_inv
             y = (y0 - delta_y) * k_inv
         return np.array((x * fx + cx, y * fy + cy))
-
+    
+    
+    def _cart2pol(self, x, y):
+        """
+        x:  numpy array composed of x coords for each detected object
+        y:  numpy array composed of y coords for each detected object
+        """
+        rho = np.sqrt(x**2 + y**2)
+        phi = np.arctan2(y, x)
+        return np.asarray([rho, phi])
+    
+    
+    def _pol2cart(self, rho, phi):
+        """
+        rho:  numpy array composed of rho for each detected object
+        phi:  numpy array composed of phi for each detected object
+        """
+        
+        x = rho * np.cos(phi)
+        y = rho * np.sin(phi)
+        return np.asarray([x, y])
 
     def localize(self, points):
         """_summary_
@@ -162,11 +182,20 @@ class Stalker():
 
         #Point K with respect to World Frame
         A_wk = O_wc + (-O_wc[2,:]/(np.dot(R_wc, A_ckpx)[2,:]))*np.dot(R_wc, A_ckpx)
-        return A_wk
+        
+        print("Before: Cart-Pixel_Coords: \n{}".format(A_wk))
+        
+        #Point K with respect to World Frame in Polar coords
+        A_wk_polar = self._cart2pol(A_wk[0,:], A_wk[1,:])
+        print("During: Polar-Pixel_Coords: \n{}".format(A_wk_polar))
+        
+        A_wk_cart = self._pol2cart(A_wk_polar[0,:], A_wk_polar[1,:])
+        print("After: Cart-Pixel_Coords: \n{}".format(A_wk_cart ))
+        return A_wk_polar
 
 
 def main():
-    model = YOLO(str(Path(os.getcwd()).parent) + "/model/yolov8n.pt")
+    model = YOLO(str(os.getcwd()) + "/model_training/yolov8n.pt")
     stalker = Stalker()
     device = 0
     
@@ -190,14 +219,14 @@ def main():
                               classes=[49, 32], 
                               conf=0.3, 
                               show=False, 
-                              tracker=str(Path(os.getcwd()).parent) + "/model/customtrack.yaml", 
+                              tracker=str(Path(os.getcwd()).parent) + "/customtrack.yaml", 
                               stream=True):   
         
         frame = result.orig_img
         detections = sv.Detections.from_yolov8(result)
         
         points = result.boxes.xywhn
-        points_world = stalker.localize(points)
+        polar_points_world = stalker.localize(points)
         
         #points = denormalize(result.boxes.xywhn, camera_resolution=(1920, 1080))
         #points = shift(points)
@@ -205,7 +234,7 @@ def main():
         #y_coords = points[:, 1]
         #points = torch.transpose(points[:, 0:2], 0, 1).numpy()
         #points_world = localize(points)
-        print("Pixel_Coords: {} ".format(points_world))
+        print("Pixel_Coords: \n{} ".format(polar_points_world))
 
         if result.boxes.id is not None:
             detections.tracker_id = result.boxes.id.cpu().numpy().astype(int) 
@@ -244,7 +273,7 @@ if __name__ == "__main__":
     script_path = os.path.realpath(__file__)
     os.chdir(Path(script_path).parent)
     print(os.getcwd())
-    #main()				
+    main()				
     
     
     

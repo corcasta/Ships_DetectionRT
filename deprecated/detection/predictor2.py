@@ -8,7 +8,7 @@ import imutils
 import supervision as sv
 import time
 
-
+"""
 #Setting up working directory
 if os.path.basename(os.getcwd()) != "Ships_DetectionRT":
     WORKING_DIR = str(Path(os.getcwd()).parent)
@@ -18,7 +18,7 @@ if os.path.exists(WORKING_DIR):
     print("pwd: " + WORKING_DIR)
 else:
     assert("Desired working directory doesn't exist")
-    
+"""
          
 def main():
     #*********************FPS-DISPLAY-SETTINGS***********************
@@ -32,18 +32,12 @@ def main():
     
     #Loading Test dataset
     #test_imgs = sorted(glob(os.path.join(working_dir, "SMDataset_YV8", "test", "images", "*")))
-    video = os.path.join(WORKING_DIR, "videos", "singapore_demo480.mp4")
+    video = os.path.join(str(Path(os.getcwd()).parent.parent), "videos", "singapore_demo480.mp4")
            
     #Loading trained weights
-    weights = sorted(glob(os.path.join(WORKING_DIR, 
-                                       "training", 
-                                       "runs", 
-                                       "detect", 
-                                       "train", 
-                                       "weights", 
-                                       "*.pt")))
+    weights = sorted(glob("best_medium.pt"))
     best_weights = weights[0]
-    last_weights = weights[1]
+    #last_weights = weights[1]
 
     #Model Instance
     model = YOLO(best_weights)
@@ -102,4 +96,7 @@ def main():
             break
         
 if __name__ == "__main__":
+    # Setting the starting path of the script
+    script_path = os.path.realpath(__file__)
+    os.chdir(Path(script_path).parent)
     main()
