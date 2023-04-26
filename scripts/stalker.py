@@ -183,14 +183,15 @@ class Stalker():
         #Point K with respect to World Frame
         A_wk = O_wc + (-O_wc[2,:]/(np.dot(R_wc, A_ckpx)[2,:]))*np.dot(R_wc, A_ckpx)
         
-        print("Before: Cart-Pixel_Coords: \n{}".format(A_wk))
-        
         #Point K with respect to World Frame in Polar coords
         A_wk_polar = self._cart2pol(A_wk[0,:], A_wk[1,:])
-        print("During: Polar-Pixel_Coords: \n{}".format(A_wk_polar))
         
-        A_wk_cart = self._pol2cart(A_wk_polar[0,:], A_wk_polar[1,:])
-        print("After: Cart-Pixel_Coords: \n{}".format(A_wk_cart ))
+        #DEBUG
+        #print("Before: Cart-Pixel_Coords: \n{}".format(A_wk))
+        #print("During: Polar-Pixel_Coords: \n{}".format(A_wk_polar))
+        #A_wk_cart = self._pol2cart(A_wk_polar[0,:], A_wk_polar[1,:])
+        #print("After: Cart-Pixel_Coords: \n{}".format(A_wk_cart ))
+        
         return A_wk_polar
 
 

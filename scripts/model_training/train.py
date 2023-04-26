@@ -4,7 +4,7 @@ from ultralytics import YOLO
 
 def main():
     # Load pretrained model 
-    model = YOLO("yolov8m.pt")
+    model = YOLO("yolov8l.pt")
     
     # Load dataset
     dataset = os.path.join(Path(os.getcwd()).parent.parent, "datasets", "data.yaml")
