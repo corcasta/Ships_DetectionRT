@@ -1,7 +1,7 @@
-numpy
+lap
+roboflow
+supervision
 ultralytics
 onnx>=1.12.0
-supervision
-lap
 deepsparse
-
+numpy

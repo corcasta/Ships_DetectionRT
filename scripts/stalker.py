@@ -240,7 +240,11 @@ def main():
     
          
 if __name__ == "__main__":    
-    main()				
+    # Setting the starting path of the script
+    script_path = os.path.realpath(__file__)
+    os.chdir(Path(script_path).parent)
+    print(os.getcwd())
+    #main()				
     
     
     
