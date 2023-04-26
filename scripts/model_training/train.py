@@ -10,7 +10,7 @@ def main():
     dataset = os.path.join(Path(os.getcwd()).parent.parent, "datasets", "data.yaml")
     
     # Train the model
-    model.train(data=dataset, epochs=5, imgsz=640, plots=True)
+    model.train(device=0, data=dataset, epochs=100, imgsz=640, plots=True)
 
 
 if __name__ == "__main__":
