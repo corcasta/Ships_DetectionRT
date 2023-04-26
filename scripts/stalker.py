@@ -11,26 +11,25 @@ import supervision as sv
 from ultralytics import YOLO
 import matplotlib.pyplot as plt
 
-
 class Stalker():
     def __init__(self, camera_resolution=(1920, 1080)):
         self.cam_width = camera_resolution[0]
         self.cam_height = camera_resolution[1]
         
         #The following two attributes come from the calibration script
-        Path(os.getcwd()).parent
+        #Path(os.getcwd()).parent
         self.intrinsic_matrix = pd.read_csv(str(os.getcwd()) 
-                                          + "/calibration/details/intrinsic_matrix.txt", 
-                                          delim_whitespace=True, 
-                                          header=None).to_numpy()
+                                            + "/cam_calibration/details/intrinsic_matrix.txt", 
+                                            delim_whitespace=True, 
+                                            header=None).to_numpy()
         
         #self.intrinsic_newmatrix = pd.read_csv(str(Path(os.getcwd()).parent) 
-        #                                     + "/calibration/details/newcam_intrinsics.txt", 
+        #                                     + "/cam_calibration/details/newcam_intrinsics.txt", 
         #                                     delim_whitespace=True, 
         #                                     header=None).to_numpy()
         
         self.dist_coefficients = pd.read_csv(str(os.getcwd()) 
-                                             + "/calibration/details/dist_coefficients.txt", 
+                                             + "/cam_calibration/details/dist_coefficients.txt", 
                                              delim_whitespace=True, 
                                              header=None).to_numpy()
         
@@ -55,6 +54,7 @@ class Stalker():
         points[:, 3] = points[:, 3]*self.cam_height 
         
         return points
+    
     
     def _shift(self, points):
         #Shift the point of interest from center to floor
@@ -168,7 +168,7 @@ class Stalker():
 def main():
     model = YOLO(str(Path(os.getcwd()).parent) + "/model/yolov8n.pt")
     stalker = Stalker()
-    device = 2
+    device = 0
     
     #*********************FPS-DISPLAY-SETTINGS***********************
     # used to record the time when we processed last frame
