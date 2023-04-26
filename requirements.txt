@@ -5,3 +5,4 @@ ultralytics
 onnx>=1.12.0
 deepsparse
 numpy
+numexpr==2.7.3
