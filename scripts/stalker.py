@@ -93,9 +93,10 @@ class Stalker():
         x:  numpy array composed of x coords for each detected object
         y:  numpy array composed of y coords for each detected object
         """
-        rho = np.sqrt(x**2 + y**2)
-        phi = np.arctan2(y, x)
-        return np.asarray([rho, phi])
+        rho = np.sqrt(x**2 + y**2).reshape(-1,1)
+        phi = np.arctan2(y, x).reshape(-1,1)
+        
+        return np.hstack((rho, phi))
     
     
     def _pol2cart(self, rho, phi):
@@ -103,10 +104,10 @@ class Stalker():
         rho:  numpy array composed of rho for each detected object
         phi:  numpy array composed of phi for each detected object
         """
+        x = (rho * np.cos(phi)).reshape(-1,1)
+        y = (rho * np.sin(phi)).reshape(-1,1)
         
-        x = rho * np.cos(phi)
-        y = rho * np.sin(phi)
-        return np.asarray([x, y])
+        return np.hstack((x, y))
 
     def localize(self, points):
         """_summary_
@@ -130,7 +131,7 @@ class Stalker():
         #   columns: represents individual points 
         # After calling _undistort     
         points = self._undistort(points, self.intrinsic_matrix, self.dist_coefficients)
-        print(points)
+        #print(points)
         #points = torch.transpose(points[:, 0:2], 0, 1).numpy()
   
         #Drone pose relative to World frame:
@@ -183,13 +184,19 @@ class Stalker():
         #Point K with respect to World Frame
         A_wk = O_wc + (-O_wc[2,:]/(np.dot(R_wc, A_ckpx)[2,:]))*np.dot(R_wc, A_ckpx)
         
+        # This last transformation is just to have the points
+        # in a format where each row represents a unique point
+        # instead of the mathematical matrix representation
+        # where each column represents a unique point.
+        A_wk = np.transpose(A_wk)
+        
         #Point K with respect to World Frame in Polar coords
-        A_wk_polar = self._cart2pol(A_wk[0,:], A_wk[1,:])
+        A_wk_polar = self._cart2pol(A_wk[:, 0], A_wk[:, 1])
         
         #DEBUG
         #print("Before: Cart-Pixel_Coords: \n{}".format(A_wk))
         #print("During: Polar-Pixel_Coords: \n{}".format(A_wk_polar))
-        #A_wk_cart = self._pol2cart(A_wk_polar[0,:], A_wk_polar[1,:])
+        #A_wk_cart = self._pol2cart(A_wk_polar[:, 0], A_wk_polar[:, 1])
         #print("After: Cart-Pixel_Coords: \n{}".format(A_wk_cart ))
         
         return A_wk_polar

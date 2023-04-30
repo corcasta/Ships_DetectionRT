@@ -32,7 +32,7 @@ def main():
     
     #Loading Test dataset
     #test_imgs = sorted(glob(os.path.join(working_dir, "SMDataset_YV8", "test", "images", "*")))
-    video = os.path.join(str(Path(os.getcwd()).parent.parent), "videos", "singapore_demo480.mp4")
+    video = os.path.join(str(Path(os.getcwd()).parent.parent), "videos", "sail_amsterdam.mp4")
            
     #Loading trained weights
     weights = sorted(glob("best_medium.pt"))
