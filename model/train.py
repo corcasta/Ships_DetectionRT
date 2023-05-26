@@ -7,7 +7,7 @@ def main():
     model = YOLO("yolov8l.pt")
     
     # Load dataset
-    dataset = os.path.join(Path(os.getcwd()).parent, "datasets", "data.yaml")
+    dataset = os.path.join(Path(os.getcwd()).parent, "dataset", "data.yaml")
     
     # Train the model
     model.train(device=0, data=dataset, epochs=100, imgsz=640, plots=True)

@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from glob import glob
-
+from pathlib import Path
 
 def calibrate(pattern_size, visualize=False):
     """
@@ -15,9 +15,7 @@ def calibrate(pattern_size, visualize=False):
                   
     visualize: Boolean, displays chessboard patterns during calibration.
     """
-    images = sorted(glob(os.path.join(os.getcwd(), 
-                                      "pictures", 
-                                      "*")))
+    images = sorted(glob(os.getcwd() + "/pictures/*"))
     assert images
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     objp = np.zeros((pattern_size[0]*pattern_size[1],3), np.float32)
@@ -80,5 +78,8 @@ if __name__ == "__main__":
                         nargs='+', 
                         type=int)
     args = parser.parse_args()
+    
+    script_path = os.path.realpath(__file__)
+    os.chdir(Path(script_path).parent)
     main(args)
     
