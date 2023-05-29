@@ -5,6 +5,11 @@ This repository has 3 objectives:
 - Calibrate the camera that will be mounted on the drone (obtain distortion coefficients and intrinsic data).
 - Evaluate the trained model with a benchmark.
 
+## Requirements
+Install all Python dependencies using the following command:
+```bash
+pip install -r requirements.txt
+```
 
 ## Object detector
 Models from the YOLOv8 family (n, s, m, l) by Ultralytics.
