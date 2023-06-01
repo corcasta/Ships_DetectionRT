@@ -16,6 +16,28 @@ Install all Python dependencies using the following command:
 ```bash
 pip install -r requirements.txt
 ```
+## Run benchmark
+- `videos/` is the directory to placed any video for benchmark.  
+
+Go to the model directory
+```bash
+cd model
+```
+
+If you want to test a particular set of weights or a video, just provide the apropriate path and modify the following snippet in `benchmark.py`
+
+```python
+def main():
+    # Select model to benchmark
+    weights = os.getcwd() + "/runs/detect" + "/train4/weights/best.pt"
+    # Select video to benchmark
+    video = str(Path(os.getcwd()).parent) + "/videos/" + "sail_amsterdam.mp4"
+``` 
+
+Then just run the script.
+```bash
+python benchmark.py
+```
 
 ## Run camera calibration
 Go to the camera directory
@@ -63,28 +85,3 @@ python train.py
 After training, the model weights are located inside `/runs/detect/train/weights` you can then copy the file **.pt** to the [periscope package](https://github.com/ocortina/ros_periscope).  
 
 **NOTE:** If you make a second run for training, the new weights will be located in `runs/detect/train2/weights`.
-
-
-## Run benchmark
-- `videos/` is the directory to placed any video for benchmark.  
-
-Go to the model directory
-```bash
-cd model
-```
-
-If you want to test a particular set of weights or a video, just provide the apropriate path and modify the following snippet in `benchmark.py`
-
-```python
-def main():
-    # Select model to benchmark
-    weights = os.getcwd() + "/runs/detect" + "/train4/weights/best.pt"
-    # Select video to benchmark
-    video = str(Path(os.getcwd()).parent) + "/videos/" + "sail_amsterdam.mp4"
-``` 
-
-Then just run the script.
-```bash
-python benchmark.py
-```
-
