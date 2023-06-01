@@ -66,7 +66,7 @@ Go to the model directory
 cd model
 ```
 
-- `runs/detect/` is the directory where the data (model weights, graphs, etc.) of each training run will be saved.
+- `runs/detect/` is the directory where the data (model weights, plots, graphs, etc.) of each training run will be saved.
 
 Training settings for YOLO models refer to the various hyperparameters and configurations used to train the model on a dataset. These settings can affect the model's performance, speed, and accuracy. Some common YOLO training settings include the batch size, learning rate, momentum, and weight decay. Other factors that may affect the training process include the choice of optimizer, the choice of loss function, and the size and composition of the training dataset. It is important to carefully tune and experiment with these settings to achieve the best possible performance for a given task.
 
