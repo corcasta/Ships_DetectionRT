@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
        
 def main():
     # Select model to benchmark
-    weights = os.getcwd() + "/runs/detect" + "/train4/weights/best.pt"
+    weights = os.getcwd() + "/runs/detect" + "/train/weights/best.pt"
     # SElect video to benchmark
     video = str(Path(os.getcwd()).parent) + "/videos/" + "sail_amsterdam.mp4"
     
@@ -44,7 +44,7 @@ def main():
         print(detections)
         labels = [
             f"#:{tracker_id}, {model.model.names[class_id]}: {confidence:0.2f}"
-            for xyxy, confidence, class_id, tracker_id 
+            for xyxy, _, confidence, class_id, tracker_id 
             in detections
         ]
         
