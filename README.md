@@ -34,7 +34,8 @@ def main():
     video = str(Path(os.getcwd()).parent) + "/videos/" + "sail_amsterdam.mp4"
 ``` 
 
-Then just run the script.
+Then just run the script.  
+Note: If everything has been installed properly you should be able to run the node (DON'T FORGET TO BUILD THE PACKAGE)
 ```bash
 python benchmark.py
 ```
