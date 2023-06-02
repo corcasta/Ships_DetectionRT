@@ -35,7 +35,7 @@ def main():
 ``` 
 
 Then just run the script.  
-Note: If everything has been installed properly you should be able to run the node (DON'T FORGET TO BUILD THE PACKAGE)
+**Note**: If everything has been installed properly you should be able to run the script.
 ```bash
 python benchmark.py
 ```
